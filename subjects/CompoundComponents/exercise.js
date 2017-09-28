@@ -35,23 +35,53 @@ import PropTypes from 'prop-types'
 
 class RadioGroup extends React.Component {
   static propTypes = {
-    defaultValue: PropTypes.string
+    defaultValue: PropTypes.string,
+    value: PropTypes.string
+  }
+
+  state = {
+    selectedValue: ''
+  };
+
+  componentDidMount() {
+    if (this.props.defaultValue) {
+      this.changeState(this.props.defaultValue)
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.value !== this.props.value) {
+      this.changeState(this.props.value)
+    }
+  }
+
+  changeState(value) {
+    this.setState({ selectedValue: this.props.value || value })
   }
 
   render() {
-    return <div>{this.props.children}</div>
+    const children = React.Children.map(this.props.children, (child, index) => {
+      const isSelected = child.props.value === this.state.selectedValue
+      return React.cloneElement(child, {
+        isSelected,
+        selectThisOption: () => isSelected ? undefined : this.changeState(child.props.value)
+      })
+    })
+    return <div>{children}</div>
   }
 }
 
 class RadioOption extends React.Component {
   static propTypes = {
-    value: PropTypes.string
+    value: PropTypes.string,
+    isSelected: PropTypes.bool.isRequired,
+    selectThisOption: PropTypes.func.isRequired
   }
 
   render() {
     return (
-      <div>
-        <RadioIcon isSelected={false}/> {this.props.children}
+      <div onClick={this.props.selectThisOption}>
+        <RadioIcon isSelected={this.props.isSelected}/> {this.props.children}
       </div>
     )
   }
@@ -81,17 +111,22 @@ class RadioIcon extends React.Component {
 }
 
 class App extends React.Component {
+  state = {
+    radioValue: ''
+  };
   render() {
     return (
       <div>
         <h1>♬ It's about time that we all turned off the radio ♫</h1>
 
-        <RadioGroup defaultValue="fm">
+        <RadioGroup value={this.state.radioValue} defaultValue="fm">
           <RadioOption value="am">AM</RadioOption>
           <RadioOption value="fm">FM</RadioOption>
           <RadioOption value="tape">Tape</RadioOption>
           <RadioOption value="aux">Aux</RadioOption>
         </RadioGroup>
+
+        <button onClick={() => this.setState({ radioValue: 'tape' })} >Select Tape</button>
       </div>
     )
   }
