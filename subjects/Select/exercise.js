@@ -59,9 +59,15 @@ class Select extends React.Component {
   }
 
   render() {
+    let label = ''
+    React.Children.forEach(this.props.children, (child, idx) => {
+      if (child.props.value === this.state.selectedValue) {
+        label = child.props.children
+      }
+    })
     return (
       <div className="select">
-        <div className="label" onClick={() => this.handleOpen()}>{this.state.selectedValue} <span className="arrow">▾</span></div>
+        <div className="label" onClick={() => this.handleOpen()}>{label} <span className="arrow">▾</span></div>
         {this.state.optionsOpen && (
           <div className="options">
             {this.props.children}
