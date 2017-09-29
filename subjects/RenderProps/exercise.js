@@ -24,7 +24,7 @@ import PropTypes from 'prop-types'
 import LoadingDots from './utils/LoadingDots'
 import getAddressFromCoords from './utils/getAddressFromCoords'
 
-class App extends React.Component {
+class GeoPosition extends React.Component {
   state = {
     coords: {
       latitude: null,
@@ -54,19 +54,35 @@ class App extends React.Component {
   }
 
   render() {
+    return this.props.render(this.state)
+  }
+}
+
+class App extends React.Component {
+  static PropTypes = {
+    error: PropTypes.object,
+    coords: PropTypes.shape({
+      latitude: PropTypes.number.isRequired,
+      longitude: PropTypes.number.isRequired
+    }).isRequired
+  }
+
+  render() {
     return (
       <div>
         <h1>Geolocation</h1>
-        {this.state.error ? (
-          <div>Error: {this.state.error.message}</div>
-        ) : (
-          <dl>
-            <dt>Latitude</dt>
-            <dd>{this.state.coords.latitude || <LoadingDots/>}</dd>
-            <dt>Longitude</dt>
-            <dd>{this.state.coords.longitude || <LoadingDots/>}</dd>
-          </dl>
-        )}
+        <GeoPosition render={({ error, coords }) => (
+          error ? (
+            <div>Error: {error.message}</div>
+          ) : (
+              <dl>
+                <dt>Latitude</dt>
+                <dd>{coords.latitude || <LoadingDots/>}</dd>
+                <dt>Longitude</dt>
+                <dd>{coords.longitude || <LoadingDots/>}</dd>
+              </dl>
+            )
+        )}/>
       </div>
     )
   }
