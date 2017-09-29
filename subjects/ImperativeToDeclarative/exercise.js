@@ -13,15 +13,27 @@ import 'bootstrap-webpack'
 class Modal extends React.Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
-    children: PropTypes.node
+    children: PropTypes.node,
+    onCloseClick: PropTypes.isRequired
   }
 
-  open() {
-    $(this.node).modal('show')
+  componentDidMount() {
+    this.doImperativeWork(this.props.isOpen)
+    $(this.node).on('hidden.bs.modal', this.props.onCloseClick)
   }
 
-  close() {
-    $(this.node).modal('hide')
+  componentDidUpdate(prevProps) {
+    if (prevProps.isOpen !== this.props.isOpen) {
+      this.doImperativeWork(this.props.isOpen)
+    }
+  }
+
+  doImperativeWork(isOpen) {
+    if (isOpen) {
+      $(this.node).modal('show')
+    } else {
+      $(this.node).modal('hide')
+    }
   }
 
   render() {
@@ -43,15 +55,21 @@ class Modal extends React.Component {
 }
 
 class App extends React.Component {
+
+  state = {
+    isModalOpen: false
+  }
+
   openModal = () => {
-    this.modal.open()
+    this.setState({ isModalOpen: true })
   }
 
   closeModal = () => {
-    this.modal.close()
+    this.setState({ isModalOpen: false })
   }
 
   render() {
+    const { isModalOpen } = this.state
     return (
       <div className="container">
         <h1>Let’s make bootstrap modal declarative</h1>
@@ -61,7 +79,7 @@ class App extends React.Component {
           onClick={this.openModal}
         >open modal</button>
 
-        <Modal title="Declarative is better" ref={modal => this.modal = modal}>
+        <Modal title="Declarative is better" isOpen={isModalOpen} onCloseClick={this.closeModal} >
           <p>Calling methods on instances is a FLOW not a STOCK!</p>
           <p>It’s the dynamic process, not the static program in text space.</p>
           <p>You have to experience it over time, rather than in snapshots of state.</p>
